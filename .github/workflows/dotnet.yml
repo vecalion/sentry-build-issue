@@ -61,7 +61,7 @@ jobs:
       
       
     - name: Build
-      run: dotnet publish -f net8.0-ios -c Release --no-restore 
+      run: dotnet publish -f net8.0-ios -c Release
       working-directory: src/
       
     
