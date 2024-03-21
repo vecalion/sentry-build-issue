@@ -21,11 +21,14 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+
+    - run: dotnet workload install maui-ios
         
     - name: Restore dependencies
       run: dotnet restore
       
     - name: Build
-      run: dotnet build src/Sentry.Samples.Maui.sln -f net8.0-ios -c Release -p:RuntimeIdentifier=ios-arm64 --no-restore 
+      run: dotnet build -f net8.0-ios -c Release -p:RuntimeIdentifier=ios-arm64 --no-restore 
+      working-directory: src/
       
     
