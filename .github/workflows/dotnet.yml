@@ -29,7 +29,7 @@ jobs:
       working-directory: src/
       
     - name: Build
-      run: dotnet build -f net8.0-ios -c Release -p:RuntimeIdentifier=ios-arm64 --no-restore 
+      run: dotnet build -f net8.0-ios -c Release --no-restore 
       working-directory: src/
       
     
