@@ -1,0 +1,78 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+name: Sentry Test
+
+variables:
+  - group: keys
+  - name: BuildConfiguration
+    value: 'Release'
+  - name: DotNetVersion
+    value: '8.0.203'
+
+trigger:
+- main
+
+pool: 'SQ Agents'
+#pool:
+#  vmImage: 'macos-13'
+
+steps:
+  - task: UseDotNet@2
+    displayName: .NET Version
+    inputs:
+      packageType: 'sdk'
+      version: '$(DotNetVersion)'
+
+  - task: InstallAppleCertificate@2
+    inputs:
+      certSecureFile: "sq_20112024_dev.p12"
+      certPwd: "$(ios_dev_cert)"
+      keychain: "temp"
+
+  - task: InstallAppleProvisioningProfile@1
+    inputs:
+      provisioningProfileLocation: "secureFiles"
+      provProfileSecureFile: "ETalons_Dev.mobileprovision"
+      
+  - task: Bash@3
+    displayName: Install MAUI
+    inputs:
+      targetType: 'inline'
+      script: |
+        dotnet workload install maui-ios maui-android --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet8/nuget/v3/index.json --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json --source https://api.nuget.org/v3/index.json
+
+  - task: Bash@3
+    displayName: Update workloads
+    inputs:
+      targetType: 'inline'
+      script: |
+        dotnet workload update
+
+  - task: Bash@3
+    displayName: Restore nuget
+    inputs:
+      targetType: 'inline'
+      script: |
+        cd ./src
+        dotnet restore Sentry.Samples.Maui.sln
+
+  # https://docs.microsoft.com/en-us/dotnet/maui/ios/deployment/overview
+  - task: Bash@3
+    displayName: Build iOS App
+    inputs:
+      targetType: 'inline'
+      script: |
+        cd ./src
+        dotnet publish -f net8.0-ios -c Release -p:RuntimeIdentifier=ios-arm64
+
+  - task: CopyFiles@2
+    inputs:
+      Contents: |
+        **/*.app
+        **/*.ipa
+        **/*.dSYM/**
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      
