@@ -26,6 +26,6 @@ jobs:
       run: dotnet restore
       
     - name: Build
-      run: dotnet build -f net8.0-ios -c Release -p:RuntimeIdentifier=ios-arm64 --no-restore ./src/Sentry.Samples.Maui.sln
+      run: dotnet build ./src/Sentry.Samples.Maui.sln -f net8.0-ios -c Release -p:RuntimeIdentifier=ios-arm64 --no-restore 
       
     
